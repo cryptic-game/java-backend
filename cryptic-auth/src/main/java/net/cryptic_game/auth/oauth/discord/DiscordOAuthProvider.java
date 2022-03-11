@@ -41,13 +41,13 @@ public class DiscordOAuthProvider implements OAuthProvider {
         .defaultHeaders(headers -> headers.setContentType(MediaType.APPLICATION_JSON))
         .build();
 
-    this.callbackUri = OAuthService.buildCallbackUri(oAuthConfig.getPublicUrl(), "discord");
+    this.callbackUri = OAuthService.buildCallbackUri(oAuthConfig.publicUrl(), "discord");
   }
 
   @Override
   public URI buildAuthorizeUrl(final String state) {
     return URI.create(AUTH_URL_TEMPLATE.formatted(
-        URLEncoder.encode(this.config.getClientId(), StandardCharsets.UTF_8),
+        URLEncoder.encode(this.config.clientId(), StandardCharsets.UTF_8),
         URLEncoder.encode(this.callbackUri, StandardCharsets.UTF_8),
         URLEncoder.encode(state, StandardCharsets.UTF_8)
     ));
@@ -73,8 +73,8 @@ public class DiscordOAuthProvider implements OAuthProvider {
 
   private Mono<TokenResponse> requestToken(final String callbackUrl, final String code) {
     final MultiValueMap<String, String> request = new LinkedMultiValueMap<>();
-    request.add("client_id", this.config.getClientId());
-    request.add("client_secret", this.config.getClientSecret());
+    request.add("client_id", this.config.clientId());
+    request.add("client_secret", this.config.clientSecret());
     request.add("grant_type", "authorization_code");
     request.add("code", code);
     request.add("redirect_uri", callbackUrl);
@@ -92,8 +92,8 @@ public class DiscordOAuthProvider implements OAuthProvider {
 
   private Mono<Void> revokeToken(final String token, final TokenType tokenType) {
     final MultiValueMap<String, String> request = new LinkedMultiValueMap<>();
-    request.add("client_id", this.config.getClientId());
-    request.add("client_secret", this.config.getClientSecret());
+    request.add("client_id", this.config.clientId());
+    request.add("client_secret", this.config.clientSecret());
     request.add("token", token);
     request.add("token_type_hint", tokenType.getValue());
 

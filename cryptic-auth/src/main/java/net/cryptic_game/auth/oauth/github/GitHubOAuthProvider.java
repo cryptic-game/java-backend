@@ -32,13 +32,13 @@ public class GitHubOAuthProvider implements OAuthProvider {
         .defaultHeaders(headers -> headers.setAccept(List.of(MediaType.APPLICATION_JSON)))
         .build();
 
-    this.callbackUri = OAuthService.buildCallbackUri(oAuthConfig.getPublicUrl(), "discord");
+    this.callbackUri = OAuthService.buildCallbackUri(oAuthConfig.publicUrl(), "discord");
   }
 
   @Override
   public URI buildAuthorizeUrl(final String state) {
     return URI.create(AUTH_URL_TEMPLATE.formatted(
-        URLEncoder.encode(this.config.getClientId(), StandardCharsets.UTF_8),
+        URLEncoder.encode(this.config.clientId(), StandardCharsets.UTF_8),
         URLEncoder.encode(this.callbackUri, StandardCharsets.UTF_8),
         URLEncoder.encode(state, StandardCharsets.UTF_8)
     ));
@@ -57,8 +57,8 @@ public class GitHubOAuthProvider implements OAuthProvider {
 
   private Mono<TokenResponse> requestToken(final String callbackUrl, final String code) {
     final MultiValueMap<String, String> request = new LinkedMultiValueMap<>();
-    request.add("client_id", this.config.getClientId());
-    request.add("client_secret", this.config.getClientSecret());
+    request.add("client_id", this.config.clientId());
+    request.add("client_secret", this.config.clientSecret());
     request.add("code", code);
     request.add("redirect_uri", callbackUrl);
 
