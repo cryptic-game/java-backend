@@ -8,8 +8,6 @@ import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -42,7 +40,7 @@ public class UserOAuth extends TableModel {
     @Column(name = "user_id", updatable = false, nullable = false)
     private UUID userId;
 
-//    @Enumerated(EnumType.STRING)
+    //    @Enumerated(EnumType.STRING)
     @Column(name = "provider_id", updatable = false, nullable = false)
     private String provider;
   }

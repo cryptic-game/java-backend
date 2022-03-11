@@ -5,6 +5,7 @@ import java.net.URI;
 import java.time.Duration;
 import java.util.Set;
 import java.util.UUID;
+import net.cryptic_game.CrypticConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -31,9 +32,10 @@ public class OAuthController {
   private final Resource stateExpired;
 
   public OAuthController(
+      final CrypticConfig config,
       final OAuthService oAuthService,
-      @Value("classpath:/public/successful_auth.html") final Resource successfulAuth,
-      @Value("classpath:/public/state_expired.html") final Resource stateExpired
+      @Value("classpath:/pages/successful_auth.html") final Resource successfulAuth,
+      @Value("classpath:/pages/state_expired.html") final Resource stateExpired
   ) {
     this.oAuthService = oAuthService;
     this.successfulAuth = successfulAuth;
@@ -63,6 +65,7 @@ public class OAuthController {
         .httpOnly(true)
         .maxAge(Duration.ofMinutes(5))
         .sameSite("Lax")
+        .path("/")
         .build();
 
     response.addCookie(stateCookie);
@@ -71,6 +74,7 @@ public class OAuthController {
         .httpOnly(true)
         .maxAge(Duration.ofMinutes(5))
         .sameSite("Lax")
+        .path("/")
         .build();
 
     response.addCookie(challengeCookie);

@@ -2,7 +2,7 @@ package net.cryptic_game.auth;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
-import net.cryptic_game.auth.oauth.OAuthConfig;
+import net.cryptic_game.CrypticConfig;
 import net.cryptic_game.auth.oauth.discord.DiscordOAuthConfig;
 import net.cryptic_game.auth.oauth.github.GitHubOAuthConfig;
 import org.springdoc.core.GroupedOpenApi;
@@ -12,7 +12,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication
-@EnableConfigurationProperties({OAuthConfig.class, DiscordOAuthConfig.class, GitHubOAuthConfig.class})
+@EnableConfigurationProperties({CrypticConfig.class, DiscordOAuthConfig.class, GitHubOAuthConfig.class})
 public class Bootstrap {
 
   public static void main(final String[] args) {

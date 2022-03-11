@@ -4,14 +4,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.time.OffsetDateTime;
-import java.util.List;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.cryptic_game.CrypticConfig;
 import net.cryptic_game.auth.oauth.InvalidOAuthCodeException;
 import net.cryptic_game.auth.oauth.OAuthCallbackResponse;
-import net.cryptic_game.auth.oauth.OAuthConfig;
 import net.cryptic_game.auth.oauth.OAuthProvider;
 import net.cryptic_game.auth.oauth.OAuthService;
 import org.springframework.http.HttpStatus;
@@ -34,14 +32,14 @@ public class DiscordOAuthProvider implements OAuthProvider {
   private final WebClient client;
   private final String callbackUri;
 
-  public DiscordOAuthProvider(final OAuthConfig oAuthConfig, final DiscordOAuthConfig config) {
+  public DiscordOAuthProvider(final CrypticConfig crypticConfig, final DiscordOAuthConfig config) {
     this.config = config;
     this.client = WebClient.builder()
         .baseUrl("https://discord.com/api/oauth2/")
         .defaultHeaders(headers -> headers.setContentType(MediaType.APPLICATION_JSON))
         .build();
 
-    this.callbackUri = OAuthService.buildCallbackUri(oAuthConfig.publicUrl(), "discord");
+    this.callbackUri = OAuthService.buildCallbackUri(crypticConfig.publicUrl(), "discord");
   }
 
   @Override
@@ -133,16 +131,6 @@ public class DiscordOAuthProvider implements OAuthProvider {
         .flatMap(Mono::error);
   }
 
-  private record TokenResponse(
-      @JsonProperty("access_token") String accessToken,
-      @JsonProperty("token_type") String tokenType,
-      @JsonProperty("expires_in") long expiresIn,
-      @JsonProperty("refresh_token") String refreshToken,
-      @JsonProperty("scope") String scope
-  ) {
-
-  }
-
   @Getter
   @RequiredArgsConstructor
   private enum TokenType {
@@ -152,10 +140,20 @@ public class DiscordOAuthProvider implements OAuthProvider {
     private final String value;
   }
 
+  private record TokenResponse(
+      @JsonProperty("access_token") String accessToken,
+      // @JsonProperty("token_type") String tokenType,
+      // @JsonProperty("expires_in") long expiresIn,
+      @JsonProperty("refresh_token") String refreshToken
+      // @JsonProperty("scope") String scope
+  ) {
+
+  }
+
   private record AuthInformationResponse(
       // @JsonProperty("application") Application application,
-      @JsonProperty("scopes") List<String> scopes,
-      @JsonProperty("expires") OffsetDateTime expires,
+      // @JsonProperty("scopes") List<String> scopes,
+      // @JsonProperty("expires") OffsetDateTime expires,
       @JsonProperty("user") User user
   ) {
 
@@ -167,7 +165,7 @@ public class DiscordOAuthProvider implements OAuthProvider {
   }
 
   private record DiscordApiError(
-      @JsonProperty("error") String type,
+      // @JsonProperty("error") String type,
       @JsonProperty("error_description") String description
   ) {
 

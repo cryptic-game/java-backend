@@ -5,9 +5,9 @@ import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import net.cryptic_game.CrypticConfig;
 import net.cryptic_game.auth.oauth.InvalidOAuthCodeException;
 import net.cryptic_game.auth.oauth.OAuthCallbackResponse;
-import net.cryptic_game.auth.oauth.OAuthConfig;
 import net.cryptic_game.auth.oauth.OAuthProvider;
 import net.cryptic_game.auth.oauth.OAuthService;
 import org.springframework.http.MediaType;
@@ -26,13 +26,13 @@ public class GitHubOAuthProvider implements OAuthProvider {
   private final WebClient client;
   private final String callbackUri;
 
-  public GitHubOAuthProvider(final OAuthConfig oAuthConfig, final GitHubOAuthConfig config) {
+  public GitHubOAuthProvider(final CrypticConfig crypticConfig, final GitHubOAuthConfig config) {
     this.config = config;
     this.client = WebClient.builder()
         .defaultHeaders(headers -> headers.setAccept(List.of(MediaType.APPLICATION_JSON)))
         .build();
 
-    this.callbackUri = OAuthService.buildCallbackUri(oAuthConfig.publicUrl(), "discord");
+    this.callbackUri = OAuthService.buildCallbackUri(crypticConfig.publicUrl(), "github");
   }
 
   @Override
