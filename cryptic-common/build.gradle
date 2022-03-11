@@ -1,0 +1,28 @@
+plugins {
+    id 'java-library'
+    id 'org.hibernate.orm'
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter'
+
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
+    annotationProcessor "com.github.therapi:therapi-runtime-javadoc-scribe:${therapiRuntimeJavadocVersion}"
+    implementation "org.springdoc:springdoc-openapi-webflux-core:${springDocVersion}"
+
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+    annotationProcessor 'org.springframework:spring-context-indexer'
+    // testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    // testImplementation 'io.projectreactor:reactor-test'
+}
+
+hibernate {
+    enhance {
+        enableLazyInitialization = true
+        enableDirtyTracking = true
+        enableAssociationManagement = true
+        enableExtendedEnhancement = false
+    }
+}

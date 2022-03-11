@@ -2,11 +2,15 @@ package net.cryptic_game.auth;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
+import org.springdoc.core.GroupedOpenApi;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication
+@EnableConfigurationProperties
+
 public class Bootstrap {
 
   public static void main(final String[] args) {
@@ -21,5 +25,13 @@ public class Bootstrap {
                 .title("Cryptic Auth Api Definition")
                 .version(Bootstrap.class.getPackage().getImplementationVersion())
         );
+  }
+
+  @Bean
+  GroupedOpenApi crypticAuth() {
+    return GroupedOpenApi.builder()
+        .group("cryptic-auth")
+        .pathsToMatch("/auth/**")
+        .build();
   }
 }

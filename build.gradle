@@ -2,6 +2,7 @@ buildscript {
     ext {
         springBootVersion = '2.6.4'
         springDocVersion = '1.6.6'
+        novaVersion = '3.0.3'
         therapiRuntimeJavadocVersion = '0.13.0'
     }
 }
@@ -25,7 +26,13 @@ allprojects {
     group('net.cryptic-game')
 
     repositories {
-        mavenCentral()
+        mavenCentral {
+            content { excludeGroup('de.m4rc3l.nova') }
+        }
+        maven {
+            url 'https://mvn.m4rc3l.de'
+            content { includeGroup('de.m4rc3l.nova') }
+        }
     }
 }
 

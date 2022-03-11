@@ -17,4 +17,5 @@ pluginManagement {
 
 rootProject.name = 'java-backend'
 include 'cryptic-auth'
+include 'cryptic-common'
 

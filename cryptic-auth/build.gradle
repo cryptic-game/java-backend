@@ -6,35 +6,42 @@ plugins {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
 
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation "de.m4rc3l.nova:nova-data-jpa:${novaVersion}"
     runtimeOnly 'org.postgresql:postgresql'
-//   runtimeOnly 'org.liquibase:liquibase-core'
+    runtimeOnly 'org.flywaydb:flyway-core'
+
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
 
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
-
-    annotationProcessor "com.github.therapi:therapi-runtime-javadoc-scribe:${therapiRuntimeJavadocVersion}"
-    implementation "org.springdoc:springdoc-openapi-webflux-ui:${springDocVersion}"
-//  implementation "org.springdoc:springdoc-openapi-native:${springDocVersion}"
-    implementation "org.springdoc:springdoc-openapi-javadoc:${springDocVersion}"
+    implementation "de.m4rc3l.nova:nova-core:${novaVersion}"
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
-    implementation platform('io.sentry:sentry-bom:5.6.2')
+    implementation "org.springdoc:springdoc-openapi-webflux-ui:${springDocVersion}"
+    // implementation "org.springdoc:springdoc-openapi-native:${springDocVersion}"
+    implementation "org.springdoc:springdoc-openapi-javadoc:${springDocVersion}"
+    annotationProcessor "com.github.therapi:therapi-runtime-javadoc-scribe:${therapiRuntimeJavadocVersion}"
+
+    implementation platform('io.sentry:sentry-bom:5.6.3')
     implementation 'io.sentry:sentry-spring-boot-starter'
     implementation 'io.sentry:sentry-logback'
-
-//  runtimeOnly 'io.netty:netty-tcnative-boringssl-static'
 
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     annotationProcessor 'org.springframework:spring-context-indexer'
-//    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-//    testImplementation 'io.projectreactor:reactor-test'
+    // testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    // testImplementation 'io.projectreactor:reactor-test'
 }
 
 springBoot {
     buildInfo()
 }
 
-bootBuildImage {
-    builder = 'paketobuildpacks/builder:tiny'
-    environment = ['BP_NATIVE_IMAGE': 'true']
+hibernate {
+    enhance {
+        enableLazyInitialization = true
+        enableDirtyTracking = true
+        enableAssociationManagement = true
+        enableExtendedEnhancement = false
+    }
 }
