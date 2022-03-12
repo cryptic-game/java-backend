@@ -6,11 +6,11 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import net.cryptic_game.auth.oauth.exception.InvalidOAuthCodeException;
 import net.cryptic_game.auth.oauth.OAuthFlowService;
 import net.cryptic_game.auth.oauth.OAuthProvider;
 import net.cryptic_game.auth.oauth.OAuthProvider.Metadata;
 import net.cryptic_game.auth.oauth.OAuthService;
+import net.cryptic_game.auth.oauth.exception.InvalidOAuthCodeException;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 

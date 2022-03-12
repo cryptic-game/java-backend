@@ -1,13 +1,14 @@
 package net.cryptic_game.auth;
 
+import de.m4rc3l.nova.core.NovaBanner;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import net.cryptic_game.CrypticConfig;
 import net.cryptic_game.auth.oauth.impl.discord.DiscordOAuthConfig;
 import net.cryptic_game.auth.oauth.impl.github.GitHubOAuthConfig;
 import org.springdoc.core.GroupedOpenApi;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
@@ -16,7 +17,9 @@ import org.springframework.context.annotation.Bean;
 public class Bootstrap {
 
   public static void main(final String[] args) {
-    SpringApplication.run(Bootstrap.class, args);
+    new SpringApplicationBuilder(Bootstrap.class)
+        .banner(new NovaBanner())
+        .run(args);
   }
 
   @Bean
