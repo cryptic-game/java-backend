@@ -1,0 +1,108 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  pull_request:
+
+env:
+  JAVA_VERSION: 17
+  JAVA_DISTRO: temurin
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        java-version: [ 17 ]
+        java-distro: [ temurin, zulu, liberica, microsoft ]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ matrix.java-distro }}-${{ matrix.java-version }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-${{ matrix.java-distro }}-${{ matrix.java-version }}-
+
+      - name: Set up JDK ${{ matrix.java-version }}
+        uses: actions/setup-java@v2
+        with:
+          java-version: ${{ matrix.java-version }}
+          distribution: ${{ matrix.java-distro }}
+          cache: 'gradle'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Run tests with Gradle
+        run: ./gradlew test --stacktrace --no-daemon
+
+  build:
+    needs: [ test ]
+    runs-on: ubuntu-latest
+
+    permissions:
+      packages: write
+
+    strategy:
+      matrix:
+        service: [ cryptic-auth ]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-java@v3
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRO }}
+          cache: 'gradle'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build Jars
+        run: ./gradlew :${{ matrix.jvm-impl }}:assemble --stacktrace --no-daemon
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.jvm-impl }}
+          path: ${{ matrix.jvm-impl }}/build/libs
+
+      - name: Build Docker Image
+        run: ./gradlew :${{ matrix.jvm-impl }}:bootBuildImage --imageName=${{ matrix.jvm-impl }} --stacktrace --no-daemon
+
+      - name: Docker meta
+        id: meta
+        if: github.event_name != 'pull_request'
+        uses: docker/metadata-action@v3
+        with:
+          images: |
+            ghcr.io/${{ github.repository_owner }}/${{ matrix.jvm-impl }}
+          tags: |
+            type=edge
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+
+      - uses: docker/login-action@v1
+        if: github.event_name != 'pull_request'
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      - name: Push to ghcr.io
+        if: github.event_name != 'pull_request'
+        run: |
+          for image in $(echo "${{ steps.meta.outputs.tags }}" | cat -); do
+            docker tag ${{ matrix.jvm-impl }} $image
+            docker push $image
+          done
