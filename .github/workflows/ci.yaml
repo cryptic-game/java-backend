@@ -68,15 +68,15 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build Jars
-        run: ./gradlew :${{ matrix.jvm-impl }}:assemble --stacktrace --no-daemon
+        run: ./gradlew :${{ matrix.service }}:assemble --stacktrace --no-daemon
 
       - uses: actions/upload-artifact@v2
         with:
-          name: ${{ matrix.jvm-impl }}
-          path: ${{ matrix.jvm-impl }}/build/libs
+          name: ${{ matrix.service }}
+          path: ${{ matrix.service }}/build/libs
 
       - name: Build Docker Image
-        run: ./gradlew :${{ matrix.jvm-impl }}:bootBuildImage --imageName=${{ matrix.jvm-impl }} --stacktrace --no-daemon
+        run: ./gradlew :${{ matrix.service }}:bootBuildImage --imageName=${{ matrix.service }} --stacktrace --no-daemon
 
       - name: Docker meta
         id: meta
@@ -84,7 +84,7 @@ jobs:
         uses: docker/metadata-action@v3
         with:
           images: |
-            ghcr.io/${{ github.repository_owner }}/${{ matrix.jvm-impl }}
+            ghcr.io/${{ github.repository_owner }}/${{ matrix.service }}
           tags: |
             type=edge
             type=ref,event=pr
@@ -103,6 +103,6 @@ jobs:
         if: github.event_name != 'pull_request'
         run: |
           for image in $(echo "${{ steps.meta.outputs.tags }}" | cat -); do
-            docker tag ${{ matrix.jvm-impl }} $image
+            docker tag ${{ matrix.service }} $image
             docker push $image
           done
