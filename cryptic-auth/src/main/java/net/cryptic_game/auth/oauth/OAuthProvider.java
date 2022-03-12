@@ -5,7 +5,13 @@ import reactor.core.publisher.Mono;
 
 public interface OAuthProvider {
 
+  Metadata getMetadata();
+
   URI buildAuthorizeUrl(String state);
 
-  Mono<OAuthCallbackResponse> handleCallback(String code);
+  Mono<String> handleCallback(String code);
+
+  record Metadata(String id, String name) {
+
+  }
 }

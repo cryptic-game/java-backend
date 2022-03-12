@@ -1,4 +1,4 @@
-package net.cryptic_game.auth.oauth.github;
+package net.cryptic_game.auth.oauth.impl.github;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

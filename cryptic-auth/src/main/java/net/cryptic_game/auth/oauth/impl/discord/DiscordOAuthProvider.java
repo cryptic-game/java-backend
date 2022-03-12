@@ -1,4 +1,4 @@
-package net.cryptic_game.auth.oauth.discord;
+package net.cryptic_game.auth.oauth.impl.discord;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.net.URI;
@@ -8,8 +8,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.cryptic_game.CrypticConfig;
-import net.cryptic_game.auth.oauth.InvalidOAuthCodeException;
-import net.cryptic_game.auth.oauth.OAuthCallbackResponse;
+import net.cryptic_game.auth.oauth.exception.InvalidOAuthCodeException;
 import net.cryptic_game.auth.oauth.OAuthProvider;
 import net.cryptic_game.auth.oauth.OAuthService;
 import org.springframework.http.HttpStatus;
@@ -27,6 +26,7 @@ import reactor.core.scheduler.Schedulers;
 @Component
 public class DiscordOAuthProvider implements OAuthProvider {
 
+  private static final Metadata METADATA = new Metadata("discord", "Discord");
   private static final String AUTH_URL_TEMPLATE = "https://discord.com/api/oauth2/authorize?client_id=%s&redirect_uri=%s&response_type=code&scope=identify&state=%s";
   private final DiscordOAuthConfig config;
   private final WebClient client;
@@ -43,6 +43,11 @@ public class DiscordOAuthProvider implements OAuthProvider {
   }
 
   @Override
+  public Metadata getMetadata() {
+    return METADATA;
+  }
+
+  @Override
   public URI buildAuthorizeUrl(final String state) {
     return URI.create(AUTH_URL_TEMPLATE.formatted(
         URLEncoder.encode(this.config.clientId(), StandardCharsets.UTF_8),
@@ -52,11 +57,11 @@ public class DiscordOAuthProvider implements OAuthProvider {
   }
 
   @Override
-  public Mono<OAuthCallbackResponse> handleCallback(final String code) {
+  public Mono<String> handleCallback(final String code) {
     return this.requestToken(this.callbackUri, code)
         .flatMap(tokenResponse ->
             this.requestUserInfo(tokenResponse.accessToken())
-                .map(userInfoResponse -> new OAuthCallbackResponse(userInfoResponse.user().id()))
+                .map(userInfoResponse -> userInfoResponse.user().id())
                 .doOnNext(ignored ->
                     Mono.zip(
                             this.revokeToken(tokenResponse.accessToken(), TokenType.ACCESS_TOKEN),

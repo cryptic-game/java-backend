@@ -3,52 +3,28 @@ package net.cryptic_game.auth.oauth;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
-import net.cryptic_game.auth.oauth.discord.DiscordOAuthProvider;
-import net.cryptic_game.auth.oauth.github.GitHubOAuthProvider;
-import org.springframework.stereotype.Service;
+import java.util.Set;
+import java.util.UUID;
+import net.cryptic_game.auth.oauth.OAuthProvider.Metadata;
+import net.cryptic_game.auth.oauth.impl.OAuthServiceImpl;
 import reactor.core.publisher.Mono;
 
-@Service
-public class OAuthService {
+public interface OAuthService {
 
-  private static final String CALLBACK_URI_TEMPLATE = "%s/auth/oauth/provider/%s/callback";
-  private final Map<String, OAuthProvider> provider;
+  String CALLBACK_URI_TEMPLATE = "%s/auth/oauth/%s/callback";
 
-  public OAuthService(
-      final DiscordOAuthProvider discordOAuthProvider,
-      final GitHubOAuthProvider gitHubOAuthProvider
-  ) {
-    this.provider = Map.of(
-        "discord", discordOAuthProvider,
-        "github", gitHubOAuthProvider
-    );
-  }
-
-  public static String buildCallbackUri(final String baseUrl, final String providerId) {
-    return CALLBACK_URI_TEMPLATE.formatted(
+  static String buildCallbackUri(final String baseUrl, final String providerId) {
+    return OAuthServiceImpl.CALLBACK_URI_TEMPLATE.formatted(
         baseUrl,
         URLEncoder.encode(providerId, StandardCharsets.UTF_8)
     );
   }
 
-  public URI buildAuthorizeUri(final String providerId, final String state) {
-    final OAuthProvider provider = this.provider.get(providerId);
+  Set<Metadata> getMetadata();
 
-    if (provider == null) {
-      return null;
-    }
+  URI buildAuthorizeUri(String providerId, String state);
 
-    return provider.buildAuthorizeUrl(state);
-  }
+  Mono<Void> cancelFlow(UUID flowId);
 
-  public Mono<OAuthCallbackResponse> handleCallback(
-      final String providerId,
-      final String code,
-      final String challengeId
-  ) {
-    final OAuthProvider provider = this.provider.get(providerId);
-
-    return provider.handleCallback(code);
-  }
+  Mono<Void> handleCallback(UUID flowId, String providerId, String code);
 }
