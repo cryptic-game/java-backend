@@ -34,7 +34,8 @@ public interface OAuthController {
       @RequestParam("code") String code,
       @RequestParam("state") String actualState,
       @CookieValue(value = "state", required = false) String state,
-      @CookieValue(value = "flow", required = false) UUID flowId
+      @CookieValue(value = "flow", required = false) UUID flowId,
+      ServerHttpResponse response
   );
 
   @GetMapping(value = "flow", produces = MediaType.TEXT_EVENT_STREAM_VALUE)

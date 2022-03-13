@@ -1,4 +1,4 @@
-package net.cryptic_game;
+package net.cryptic_game.common;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

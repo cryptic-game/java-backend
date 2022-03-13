@@ -1,6 +1,6 @@
-package net.cryptic_game.service.impl.auth;
+package net.cryptic_game.common.service.impl.auth;
 
-import net.cryptic_game.service.auth.UserService;
+import net.cryptic_game.common.service.auth.UserService;
 import org.springframework.stereotype.Service;
 
 @Service

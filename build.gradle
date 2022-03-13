@@ -4,6 +4,7 @@ buildscript {
         springDocVersion = '1.6.6'
         novaVersion = '3.0.3'
         therapiRuntimeJavadocVersion = '0.13.0'
+        jjwtVersion = '0.11.2'
     }
 }
 

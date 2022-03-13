@@ -1,4 +1,4 @@
-package net.cryptic_game.auth.model.jpa;
+package net.cryptic_game.auth.domain.model;
 
 import de.m4rc3l.nova.jpa.model.TableModelAutoId;
 import java.time.OffsetDateTime;
@@ -15,8 +15,8 @@ import lombok.Setter;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "user")
-public class User extends TableModelAutoId {
+@Table(name = "auth_user")
+public class UserModel extends TableModelAutoId {
 
   @Column(name = "name", nullable = false)
   private String name;

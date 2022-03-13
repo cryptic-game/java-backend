@@ -1,13 +1,14 @@
-package net.cryptic_game.auth.model.jpa;
+package net.cryptic_game.auth.domain.model;
 
 import de.m4rc3l.nova.jpa.model.TableModel;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
-import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,8 +20,8 @@ import lombok.Setter;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "user_oauth")
-public class UserOAuth extends TableModel {
+@Table(name = "auth_user_oauth")
+public class UserOAuthModel extends TableModel {
 
   @EmbeddedId
   private Id id;
@@ -34,14 +35,20 @@ public class UserOAuth extends TableModel {
   @Column(name = "last", nullable = false)
   private OffsetDateTime last;
 
+  @Setter
+  @Getter
   @Embeddable
+  @NoArgsConstructor
+  @AllArgsConstructor
   public static class Id implements Serializable {
 
-    @Column(name = "user_id", updatable = false, nullable = false)
-    private UUID userId;
+    @ManyToOne
+    @JoinColumn(name = "user_id", updatable = false, nullable = false)
+    private UserModel user;
 
     //    @Enumerated(EnumType.STRING)
     @Column(name = "provider_id", updatable = false, nullable = false)
     private String provider;
   }
+
 }

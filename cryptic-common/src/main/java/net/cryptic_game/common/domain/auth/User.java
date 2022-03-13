@@ -1,4 +1,4 @@
-package net.cryptic_game.domain.auth;
+package net.cryptic_game.common.domain.auth;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;

@@ -26,5 +26,5 @@ public interface OAuthService {
 
   Mono<Void> cancelFlow(UUID flowId);
 
-  Mono<Void> handleCallback(UUID flowId, String providerId, String code);
+  Mono<String> handleCallback(UUID flowId, String providerId, String code);
 }

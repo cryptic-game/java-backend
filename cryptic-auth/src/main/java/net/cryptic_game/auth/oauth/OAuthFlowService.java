@@ -5,13 +5,13 @@ import reactor.core.publisher.Mono;
 
 public interface OAuthFlowService {
 
-  Mono<OAuthFlowResponse> receiveFlowResponse(UUID flowId);
+  Mono<String> receiveFlowResponse(UUID flowId);
 
-  Mono<Void> successfulCallback(UUID flowId, String providerId, String providerUserId);
+  Mono<Void> successfulCallback(UUID flowId, UUID userId);
 
   Mono<Void> cancelFlow(UUID flowId);
 
-  record OAuthFlowResponse(UUID flowId, String providerId, String providerUserId) {
+  record OAuthFlowResponse(UUID flowId, UUID userId) {
 
   }
 }
