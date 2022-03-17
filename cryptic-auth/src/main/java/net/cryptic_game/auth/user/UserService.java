@@ -14,6 +14,8 @@ public interface UserService {
 
   Mono<UUID> createRegisterToken(String providerId, String providerUserId);
 
+  Mono<Boolean> isUsernameAcceptable(String name);
+
   record RegisterToken(String providerId, String providerUserId) {
 
   }

@@ -9,6 +9,7 @@ import net.cryptic_game.auth.user.exception.InvalidRegisterTokenException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -37,8 +38,17 @@ public class UserControllerImpl implements UserController {
   }
 
   @Override
-  public Mono<Boolean> checkUsername(final String name) {
-    return this.userService.isUsernameAvailable(name);
+  public Mono<ResponseEntity<Void>> checkUsername(final String name) {
+    if (name.toLowerCase().contains("mimas")) {
+      return Mono.just(new ResponseEntity<>(HttpStatus.UNAVAILABLE_FOR_LEGAL_REASONS));
+    }
+
+    return Mono.zip(this.userService.isUsernameAvailable(name), this.userService.isUsernameAcceptable(name))
+        .map(checks -> {
+          if (!checks.getT1()) return new ResponseEntity<>(HttpStatus.GONE);
+          if (!checks.getT2()) return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
+          return new ResponseEntity<>(HttpStatus.OK);
+        });
   }
 
   @Override
@@ -52,12 +62,12 @@ public class UserControllerImpl implements UserController {
           .thenReturn(this.stateExpired);
     }
 
-    if (body.username() == null || body.username().isBlank()) {
+    if (body.name() == null || body.name().isBlank()) {
       return this.flowService.cancelFlow(flowId)
           .then(Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST)));
     }
 
-    return this.userService.register(registerToken, body.username())
+    return this.userService.register(registerToken, body.name())
         .flatMap(user -> this.flowService.successfulCallback(flowId, user.id()))
         .thenReturn(this.successfulAuth)
         .onErrorResume(InvalidRegisterTokenException.class, ignored ->

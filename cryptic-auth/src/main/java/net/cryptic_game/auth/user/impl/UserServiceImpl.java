@@ -1,8 +1,10 @@
 package net.cryptic_game.auth.user.impl;
 
+import de.m4rc3l.nova.core.utils.ValidationUtils;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import net.cryptic_game.auth.domain.converter.UserModelConverter;
 import net.cryptic_game.auth.domain.model.UserModel;
@@ -23,6 +25,7 @@ import reactor.core.scheduler.Schedulers;
 public class UserServiceImpl implements UserService {
 
   private static final Duration REGISTER_TOKEN_LIFETIME = Duration.ofMinutes(10);
+  private static final Pattern NAME_PATTERN = Pattern.compile("^[a-zA-Z\\d_]{3,20}$");
 
   private final UserRepository userRepository;
   private final UserModelConverter userModelConverter;
@@ -43,6 +46,7 @@ public class UserServiceImpl implements UserService {
         .switchIfEmpty(Mono.defer(() -> Mono.error(new InvalidRegisterTokenException())))
         .flatMap(token ->
             Mono.fromCallable(() -> {
+              ValidationUtils.pattern("name", name, NAME_PATTERN);
               final OffsetDateTime now = OffsetDateTime.now();
               final UserModel userModel = new UserModel(name.strip(), now, now);
               final Id id = new Id(userModel, token.providerId());
@@ -68,5 +72,10 @@ public class UserServiceImpl implements UserService {
     return this.registerTokenRedisTemplate.opsForValue()
         .set(id.toString(), token, REGISTER_TOKEN_LIFETIME)
         .thenReturn(id);
+  }
+
+  @Override
+  public Mono<Boolean> isUsernameAcceptable(final String name) {
+    return Mono.just(NAME_PATTERN.matcher(name).matches());
   }
 }

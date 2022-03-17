@@ -38,6 +38,15 @@
     a:hover {
       color: #b0b0b0;
     }
+
+    .username-error {
+      color: red;
+    }
+
+    .hidden {
+      display: none;
+    }
+
   </style>
 </head>
 <body>
@@ -142,12 +151,57 @@
     <form action="../../user/register" method="post">
       <label>
         Username:
-        <input name="username" required type="text">
+        <input name="name" required type="text" maxlength="20" pattern="^[a-zA-Z\d_]{3,20}$"
+               oninput="checkUsername(this.value, this.checkValidity())">
       </label>
       <label>
-        <input type="submit" value="Submit">
+        <input id="username-submit" type="submit" disabled value="Submit">
       </label>
+      <p>Allowed usernames: <code>^[a-zA-Z\d_]{3,20}$</code></p>
+      <p class="username-error hidden" id="username-gone">Username gone</p>
+      <p class="username-error hidden" id="username-not-acceptable">Username not acceptable</p>
+      <p class="username-error hidden" id="username-unavailable-for-legal-reasons">Username unavailable for legal
+        reasons</p>
+      <p class="username-error hidden" id="username-unexpected-error">Unexpected error</p>
     </form>
+    <script defer>
+      const debounce = (callback, wait) => {
+        let timeoutId = null;
+        return (...args) => {
+          window.clearTimeout(timeoutId);
+          timeoutId = window.setTimeout(() => {
+            callback.apply(null, args);
+          }, wait);
+        };
+      }
+
+      const errors = {
+        "410": "username-gone",
+        "406": "username-not-acceptable",
+        "451": "username-unavailable-for-legal-reasons",
+        "any": "username-unexpected-error"
+      };
+
+      function checkUsername(name, valid) {
+        document.getElementById("username-submit").disabled = true;
+        if (valid) checkUsername0(name);
+      }
+
+      const checkUsername0 = debounce(name => {
+        fetch("../../user/name", {
+          method: "POST",
+          headers: {"Content-Type": "text/plain"},
+          body: name
+        }).then(response => {
+          Object.values(errors).forEach(id => document.getElementById(id).classList.add("hidden"));
+          if (response.status === 200) {
+            document.getElementById("username-submit").disabled = false;
+            return;
+          }
+          document.getElementById(errors[`${response.status}`] || errors["any"]).classList.remove("hidden");
+        });
+      }, 1000);
+    </script>
   </div>
 </section>
 </body>

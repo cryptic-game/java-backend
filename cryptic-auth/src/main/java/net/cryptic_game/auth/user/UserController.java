@@ -3,6 +3,7 @@ package net.cryptic_game.auth.user;
 import java.util.UUID;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,8 +12,10 @@ import reactor.core.publisher.Mono;
 
 public interface UserController {
 
-  @PostMapping
-  Mono<Boolean> checkUsername(@RequestBody String name);
+  @PostMapping(value = "name",
+      consumes = MediaType.TEXT_PLAIN_VALUE,
+      produces = MediaType.TEXT_PLAIN_VALUE)
+  Mono<ResponseEntity<Void>> checkUsername(@RequestBody String name);
 
   @PostMapping(value = "register",
       consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
@@ -22,7 +25,7 @@ public interface UserController {
       @CookieValue(value = "flow", required = false) UUID flowId
   );
 
-  record RegisterBody(String username) {
+  record RegisterBody(String name) {
 
   }
 }

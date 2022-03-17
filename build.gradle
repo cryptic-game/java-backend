@@ -2,7 +2,7 @@ buildscript {
     ext {
         springBootVersion = '2.6.4'
         springDocVersion = '1.6.6'
-        novaVersion = '3.0.3'
+        novaVersion = '3.0.4'
         therapiRuntimeJavadocVersion = '0.13.0'
         jjwtVersion = '0.11.2'
     }
