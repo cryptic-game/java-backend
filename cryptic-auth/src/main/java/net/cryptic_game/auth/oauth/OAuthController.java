@@ -24,7 +24,7 @@ public interface OAuthController {
   @GetMapping("{provider_id}/auth/{challenge_id}")
   void auth(
       @PathVariable("provider_id") String providerId,
-      @PathVariable("challenge_id") String flowId,
+      @PathVariable("challenge_id") UUID flowId,
       ServerHttpResponse response
   );
 

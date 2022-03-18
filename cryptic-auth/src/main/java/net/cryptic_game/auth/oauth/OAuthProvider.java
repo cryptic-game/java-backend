@@ -12,6 +12,5 @@ public interface OAuthProvider {
   Mono<String> handleCallback(String code);
 
   record Metadata(String id, String name) {
-
   }
 }

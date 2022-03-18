@@ -3,6 +3,7 @@ package net.cryptic_game.auth.domain.model;
 import de.m4rc3l.nova.jpa.model.TableModel;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.EmbeddedId;
@@ -35,6 +36,24 @@ public class UserOAuthModel extends TableModel {
   @Column(name = "last", nullable = false)
   private OffsetDateTime last;
 
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) {
+      return true;
+    }
+
+    if (!(o instanceof UserOAuthModel that)) {
+      return false;
+    }
+
+    return Objects.equals(this.id, that.id);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(this.id);
+  }
+
   @Setter
   @Getter
   @Embeddable
@@ -46,9 +65,26 @@ public class UserOAuthModel extends TableModel {
     @JoinColumn(name = "user_id", updatable = false, nullable = false)
     private UserModel user;
 
-    //    @Enumerated(EnumType.STRING)
     @Column(name = "provider_id", updatable = false, nullable = false)
     private String provider;
-  }
 
+    @Override
+    public boolean equals(final Object o) {
+      if (this == o) {
+        return true;
+      }
+
+      if (!(o instanceof Id id)) {
+        return false;
+      }
+
+      return Objects.equals(this.user, id.user)
+          && Objects.equals(this.provider, id.provider);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(this.user, this.provider);
+    }
+  }
 }

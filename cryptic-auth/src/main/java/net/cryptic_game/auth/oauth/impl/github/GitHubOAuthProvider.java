@@ -22,6 +22,10 @@ public class GitHubOAuthProvider implements OAuthProvider {
 
   private static final Metadata METADATA = new Metadata("github", "GitHub");
   private static final String AUTH_URL_TEMPLATE = "https://github.com/login/oauth/authorize?client_id=%s&redirect_uri=%s&scope=&state=%s";
+
+  private static final String TOKEN_URL = "https://github.com/login/oauth/access_token";
+  private static final String USERINFO_URL = "https://api.github.com/user";
+
   private final GitHubOAuthConfig config;
   private final WebClient client;
   private final String callbackUri;
@@ -61,14 +65,14 @@ public class GitHubOAuthProvider implements OAuthProvider {
   }
 
   private Mono<TokenResponse> requestToken(final String callbackUrl, final String code) {
-    final MultiValueMap<String, String> request = new LinkedMultiValueMap<>();
+    final MultiValueMap<String, String> request = new LinkedMultiValueMap<>(4);
     request.add("client_id", this.config.clientId());
     request.add("client_secret", this.config.clientSecret());
     request.add("code", code);
     request.add("redirect_uri", callbackUrl);
 
     return this.client.post()
-        .uri("https://github.com/login/oauth/access_token")
+        .uri(TOKEN_URL)
         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
         .body(BodyInserters.fromFormData(request))
         .exchangeToMono(response -> response.statusCode().is2xxSuccessful()
@@ -79,7 +83,7 @@ public class GitHubOAuthProvider implements OAuthProvider {
 
   private Mono<UserInfoResponse> requestUserInfo(final String token) {
     return this.client.get()
-        .uri("https://api.github.com/user")
+        .uri(USERINFO_URL)
         .headers(headers -> headers.setBearerAuth(token))
         .exchangeToMono(response ->
             response.statusCode().is2xxSuccessful()
@@ -93,12 +97,8 @@ public class GitHubOAuthProvider implements OAuthProvider {
       @JsonProperty("scope") String scope,
       @JsonProperty("token_type") String tokenType
   ) {
-
   }
 
-  private record UserInfoResponse(
-      @JsonProperty("id") String id
-  ) {
-
+  private record UserInfoResponse(@JsonProperty("id") String id) {
   }
 }

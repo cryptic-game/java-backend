@@ -17,6 +17,5 @@ public interface UserService {
   Mono<Boolean> isUsernameAcceptable(String name);
 
   record RegisterToken(String providerId, String providerUserId) {
-
   }
 }

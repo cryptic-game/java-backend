@@ -12,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -62,15 +61,11 @@ public class UserControllerImpl implements UserController {
           .thenReturn(this.stateExpired);
     }
 
-    if (body.name() == null || body.name().isBlank()) {
-      return this.flowService.cancelFlow(flowId)
-          .then(Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST)));
-    }
-
     return this.userService.register(registerToken, body.name())
         .flatMap(user -> this.flowService.successfulCallback(flowId, user.id()))
         .thenReturn(this.successfulAuth)
         .onErrorResume(InvalidRegisterTokenException.class, ignored ->
-            this.flowService.cancelFlow(flowId).thenReturn(this.stateExpired));
+            this.flowService.cancelFlow(flowId).thenReturn(this.stateExpired))
+        .onErrorResume(cause -> this.flowService.cancelFlow(flowId).then(Mono.error(cause)));
   }
 }

@@ -1,13 +1,11 @@
 package net.cryptic_game.auth.oauth;
 
-import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Set;
-import java.util.UUID;
 import net.cryptic_game.auth.oauth.OAuthProvider.Metadata;
+import net.cryptic_game.auth.oauth.exception.UnknownOAuthProviderException;
 import net.cryptic_game.auth.oauth.impl.OAuthServiceImpl;
-import reactor.core.publisher.Mono;
 
 public interface OAuthService {
 
@@ -22,9 +20,5 @@ public interface OAuthService {
 
   Set<Metadata> getMetadata();
 
-  URI buildAuthorizeUri(String providerId, String state);
-
-  Mono<Void> cancelFlow(UUID flowId);
-
-  Mono<String> handleCallback(UUID flowId, String providerId, String code);
+  OAuthProvider getProvider(String id) throws UnknownOAuthProviderException;
 }

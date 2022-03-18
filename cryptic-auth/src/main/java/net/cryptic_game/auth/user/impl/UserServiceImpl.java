@@ -44,9 +44,9 @@ public class UserServiceImpl implements UserService {
   public Mono<User> register(final String registerTokenId, final String name) {
     return this.registerTokenRedisTemplate.opsForValue().getAndDelete(registerTokenId)
         .switchIfEmpty(Mono.defer(() -> Mono.error(new InvalidRegisterTokenException())))
+        .doOnNext(ignored -> ValidationUtils.pattern("name", name, NAME_PATTERN))
         .flatMap(token ->
             Mono.fromCallable(() -> {
-              ValidationUtils.pattern("name", name, NAME_PATTERN);
               final OffsetDateTime now = OffsetDateTime.now();
               final UserModel userModel = new UserModel(name.strip(), now, now);
               final Id id = new Id(userModel, token.providerId());

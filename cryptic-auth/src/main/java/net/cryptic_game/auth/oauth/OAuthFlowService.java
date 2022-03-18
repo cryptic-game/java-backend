@@ -12,6 +12,5 @@ public interface OAuthFlowService {
   Mono<Void> cancelFlow(UUID flowId);
 
   record OAuthFlowResponse(UUID flowId, UUID userId) {
-
   }
 }

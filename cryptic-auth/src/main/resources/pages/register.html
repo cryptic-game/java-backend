@@ -151,11 +151,11 @@
     <form action="../../user/register" method="post">
       <label>
         Username:
-        <input name="name" required type="text" maxlength="20" pattern="^[a-zA-Z\d_]{3,20}$"
-               oninput="checkUsername(this.value, this.checkValidity())">
+        <input maxlength="20" name="name" oninput="checkUsername(this.value, this.checkValidity())" pattern="^[a-zA-Z\d_]{3,20}$" required
+               type="text">
       </label>
       <label>
-        <input id="username-submit" type="submit" disabled value="Submit">
+        <input disabled id="username-submit" type="submit" value="Submit">
       </label>
       <p>Allowed usernames: <code>^[a-zA-Z\d_]{3,20}$</code></p>
       <p class="username-error hidden" id="username-gone">Username gone</p>
@@ -184,7 +184,9 @@
 
       function checkUsername(name, valid) {
         document.getElementById("username-submit").disabled = true;
-        if (valid) checkUsername0(name);
+        if (valid) {
+          checkUsername0(name);
+        }
       }
 
       const checkUsername0 = debounce(name => {

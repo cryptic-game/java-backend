@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.cryptic_game.auth.oauth.OAuthProvider;
@@ -20,7 +19,6 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 @Slf4j
 @Component
@@ -62,20 +60,21 @@ public class DiscordOAuthProvider implements OAuthProvider {
         .flatMap(tokenResponse ->
             this.requestUserInfo(tokenResponse.accessToken())
                 .map(userInfoResponse -> userInfoResponse.user().id())
-                .doOnNext(ignored ->
-                    Mono.zip(
-                            this.revokeToken(tokenResponse.accessToken(), TokenType.ACCESS_TOKEN),
-                            this.revokeToken(tokenResponse.refreshToken(), TokenType.REFRESH_TOKEN)
-                        )
-                        .subscribeOn(Schedulers.boundedElastic())
-                        .subscribe(objects -> {
-                        }, throwable -> log.error("Unable to revoke discord tokens.", throwable))
-                )
+                .doOnNext(ignored -> this.revokeToken(tokenResponse))
         );
   }
 
+  private void revokeToken(final TokenResponse response) {
+    final Mono<Void> accessToken = this.revokeToken(response.accessToken(), TokenType.ACCESS_TOKEN);
+    final Mono<Void> refreshToken = this.revokeToken(response.refreshToken(), TokenType.REFRESH_TOKEN);
+
+    Mono.zip(accessToken, refreshToken)
+        .doOnError(throwable -> log.error("Unable to revoke discord tokens.", throwable))
+        .subscribe();
+  }
+
   private Mono<TokenResponse> requestToken(final String callbackUrl, final String code) {
-    final MultiValueMap<String, String> request = new LinkedMultiValueMap<>();
+    final MultiValueMap<String, String> request = new LinkedMultiValueMap<>(5);
     request.add("client_id", this.config.clientId());
     request.add("client_secret", this.config.clientSecret());
     request.add("grant_type", "authorization_code");
@@ -94,11 +93,11 @@ public class DiscordOAuthProvider implements OAuthProvider {
   }
 
   private Mono<Void> revokeToken(final String token, final TokenType tokenType) {
-    final MultiValueMap<String, String> request = new LinkedMultiValueMap<>();
+    final MultiValueMap<String, String> request = new LinkedMultiValueMap<>(4);
     request.add("client_id", this.config.clientId());
     request.add("client_secret", this.config.clientSecret());
     request.add("token", token);
-    request.add("token_type_hint", tokenType.getValue());
+    request.add("token_type_hint", tokenType.toString());
 
     return this.client.post()
         .uri("token/revoke")
@@ -136,43 +135,29 @@ public class DiscordOAuthProvider implements OAuthProvider {
         .flatMap(Mono::error);
   }
 
-  @Getter
   @RequiredArgsConstructor
   private enum TokenType {
     REFRESH_TOKEN("refresh_token"),
     ACCESS_TOKEN("access_token");
 
     private final String value;
-  }
 
-  private record TokenResponse(
-      @JsonProperty("access_token") String accessToken,
-      // @JsonProperty("token_type") String tokenType,
-      // @JsonProperty("expires_in") long expiresIn,
-      @JsonProperty("refresh_token") String refreshToken
-      // @JsonProperty("scope") String scope
-  ) {
-
-  }
-
-  private record AuthInformationResponse(
-      // @JsonProperty("application") Application application,
-      // @JsonProperty("scopes") List<String> scopes,
-      // @JsonProperty("expires") OffsetDateTime expires,
-      @JsonProperty("user") User user
-  ) {
-
-    private record User(
-        @JsonProperty("id") String id
-    ) {
-
+    @Override
+    public String toString() {
+      return this.value;
     }
   }
 
-  private record DiscordApiError(
-      // @JsonProperty("error") String type,
-      @JsonProperty("error_description") String description
-  ) {
+  private record TokenResponse(@JsonProperty("access_token") String accessToken,
+                               @JsonProperty("refresh_token") String refreshToken) {
+  }
 
+  private record AuthInformationResponse(@JsonProperty("user") User user) {
+
+    private record User(@JsonProperty("id") String id) {
+    }
+  }
+
+  private record DiscordApiError(@JsonProperty("error_description") String description) {
   }
 }

@@ -7,6 +7,8 @@ import javax.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import net.cryptic_game.auth.jwt.JwtService;
 import net.cryptic_game.auth.oauth.OAuthFlowService;
+import net.cryptic_game.auth.oauth.exception.FlowCanceledException;
+import org.springframework.data.redis.connection.ReactiveSubscription.Message;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.stereotype.Service;
@@ -21,7 +23,7 @@ public class OAuthFlowServiceImpl implements OAuthFlowService {
   private final ReactiveRedisTemplate<String, OAuthFlowResponse> oauthRedisTemplate;
   private final JwtService jwtService;
 
-  private final Map<UUID, MonoSink<String>> flows = new HashMap<>();
+  private final Map<UUID, MonoSink<String>> flows = new HashMap<>(5);
 
   @PostConstruct
   private void postConstruct() {
@@ -30,15 +32,13 @@ public class OAuthFlowServiceImpl implements OAuthFlowService {
 
   private void receiveFlowResponses() {
     this.oauthRedisTemplate.listenTo(new ChannelTopic(REDIS_CHANNEL))
-        .subscribe(message -> {
-          final OAuthFlowResponse response = message.getMessage();
+        .map(Message::getMessage)
+        .subscribe(response -> {
           final MonoSink<String> sink = this.flows.remove(response.flowId());
+
           if (sink != null) {
-            if (response.userId() == null) {
-              sink.error(new Throwable());
-            } else {
-              sink.success(this.jwtService.create(response.userId()));
-            }
+            if (response.userId() == null) sink.error(new FlowCanceledException());
+            else sink.success(this.jwtService.create(response.userId()));
           }
         });
   }
