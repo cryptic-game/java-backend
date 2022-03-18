@@ -14,6 +14,8 @@ dependencies {
   runtimeOnly 'org.postgresql:postgresql'
   runtimeOnly 'org.flywaydb:flyway-core'
 
+  implementation 'io.micrometer:micrometer-registry-prometheus'
+
   implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
 
   implementation 'org.springframework.boot:spring-boot-starter-webflux'
