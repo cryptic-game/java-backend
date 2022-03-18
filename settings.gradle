@@ -1,21 +1,21 @@
 pluginManagement {
-    repositories {
-        mavenCentral {
-            content { includeModule('org.hibernate', 'hibernate-gradle-plugin') }
-        }
-        gradlePluginPortal()
+  repositories {
+    mavenCentral {
+      content { includeModule('org.hibernate', 'hibernate-gradle-plugin') }
     }
+    gradlePluginPortal()
+    maven { url 'https://repo.spring.io/release/' }
+  }
 
-    resolutionStrategy {
-        eachPlugin {
-            if (requested.id.id == 'org.hibernate.orm') {
-                useModule("org.hibernate:hibernate-gradle-plugin:${requested.version}")
-            }
-        }
+  resolutionStrategy {
+    eachPlugin {
+      if (requested.id.id == 'org.hibernate.orm') {
+        useModule("org.hibernate:hibernate-gradle-plugin:${requested.version}")
+      }
     }
+  }
 }
 
 rootProject.name = 'java-backend'
 include 'cryptic-auth'
 include 'cryptic-common'
-
