@@ -95,24 +95,20 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build Docker Image
-        run: ./gradlew :${{ matrix.service }}:bootBuildImage --imageName=${{ matrix.service }} -Dflavor=${{ matrix.flavor }} --stacktrace --no-daemon
+        run: ./gradlew :${{ matrix.service }}:bootBuildImage --imageName=${{ matrix.service }} -Pflavor=${{ matrix.flavor }} --stacktrace --no-daemon
 
       - name: Docker meta
         id: meta
         if: github.event_name != 'pull_request'
-        uses: docker/metadata-action@v3
+        uses: MarcelCoding/ghaction-docker-meta@v2
         with:
-          images: |
-            ghcr.io/${{ github.repository_owner }}/${{ matrix.service }}
-          tags: |
-            type=edge
+          images: ghcr.io/${{ github.repository_owner }}/${{ matrix.service }}
+          tags-semver: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
-            type=raw,value=edge,enable=${{ matrix.flavor == 'jvm' && endsWith(github.ref, github.event.repository.default_branch) }}
-          flavor: |
-            latest=${{ matrix.flavor == 'jvm' && 'auto' || 'false' }}
-            suffix=-${{ matrix.flavor }}
+          flavor: ${{ matrix.flavor }}
+          main-flavor: ${{ matrix.flavor == 'jvm' }}
 
       - uses: docker/login-action@v1
         if: github.event_name != 'pull_request'
