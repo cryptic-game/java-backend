@@ -80,7 +80,7 @@ jobs:
     strategy:
       matrix:
         service: [ cryptic-auth ]
-        flavor: [ jvm, native ]
+        flavor: [ jvm ] # native
 
     steps:
       - uses: actions/checkout@v3
@@ -103,7 +103,7 @@ jobs:
         uses: MarcelCoding/ghaction-docker-meta@v2
         with:
           images: ghcr.io/${{ github.repository_owner }}/${{ matrix.service }}
-          tags-semver: |
+          tag-semver: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}

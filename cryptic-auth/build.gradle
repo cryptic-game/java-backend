@@ -65,6 +65,7 @@ bootBuildImage {
   environment = [
       "BPE_DELIM_JAVA_TOOL_OPTIONS" : " ",
       "BPE_APPEND_JAVA_TOOL_OPTIONS": "-DspringAot=true",
+      "BPL_JAVA_NMT_ENABLED"        : "false", // native memory tracking
       "BP_NATIVE_IMAGE"             : nativeImage.toString()
   ]
 }
