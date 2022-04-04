@@ -11,10 +11,11 @@ dependencies {
 
   implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
   implementation "de.m4rc3l.nova:nova-data-jpa:${novaVersion}"
+//  runtimeOnly 'org.hibernate:hibernate-micrometer'
   runtimeOnly 'org.postgresql:postgresql'
   runtimeOnly 'org.flywaydb:flyway-core'
 
-  implementation 'io.micrometer:micrometer-registry-prometheus'
+  runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
 
   implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
 
@@ -27,13 +28,13 @@ dependencies {
   runtimeOnly "io.jsonwebtoken:jjwt-jackson:${jjwtVersion}"
 
   implementation "org.springdoc:springdoc-openapi-webflux-ui:${springDocVersion}"
-  implementation "org.springdoc:springdoc-openapi-native:${springDocVersion}"
-  implementation "org.springdoc:springdoc-openapi-javadoc:${springDocVersion}"
+  runtimeOnly "org.springdoc:springdoc-openapi-native:${springDocVersion}"
+  runtimeOnly "org.springdoc:springdoc-openapi-javadoc:${springDocVersion}"
   annotationProcessor "com.github.therapi:therapi-runtime-javadoc-scribe:${therapiRuntimeJavadocVersion}"
 
-  implementation platform('io.sentry:sentry-bom:5.6.3')
-  implementation 'io.sentry:sentry-spring-boot-starter'
-  implementation 'io.sentry:sentry-logback'
+  runtimeOnly platform('io.sentry:sentry-bom:5.6.3')
+  runtimeOnly 'io.sentry:sentry-spring-boot-starter'
+  runtimeOnly 'io.sentry:sentry-logback'
 
 //  developmentOnly 'org.springframework.boot:spring-boot-devtools'
   annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'

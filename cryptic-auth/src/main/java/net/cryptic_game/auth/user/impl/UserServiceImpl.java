@@ -1,6 +1,7 @@
 package net.cryptic_game.auth.user.impl;
 
 import de.m4rc3l.nova.core.utils.ValidationUtils;
+import io.micrometer.core.instrument.MeterRegistry;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -26,16 +27,30 @@ public class UserServiceImpl implements UserService {
 
   private static final Duration REGISTER_TOKEN_LIFETIME = Duration.ofMinutes(10);
   private static final Pattern NAME_PATTERN = Pattern.compile("^[a-zA-Z\\d_]{3,20}$");
+  private static final String UNIQUE_DAILY_LOGINS_COUNTER = "cryptic.unique-daily-logins";
 
   private final UserRepository userRepository;
   private final UserModelConverter userModelConverter;
   private final UserOAuthRepository userOAuthRepository;
   private final ReactiveRedisTemplate<String, RegisterToken> registerTokenRedisTemplate;
 
+  private final MeterRegistry registry;
+
   @Override
   public Mono<User> login(final String providerId, final String providerUserId) {
     return Mono.fromCallable(() -> this.userRepository.findByProviderIdAndProviderUserId(providerId, providerUserId))
         .flatMap(Mono::justOrEmpty)
+        .map(user -> {
+          final OffsetDateTime now = OffsetDateTime.now();
+
+          if (!user.getLast().toLocalDate().isEqual(now.toLocalDate())) {
+            this.registry.counter(UNIQUE_DAILY_LOGINS_COUNTER).increment();
+          }
+
+          user.setLast(now);
+
+          return this.userRepository.save(user);
+        })
         .map(this.userModelConverter::toDto)
         .subscribeOn(Schedulers.boundedElastic());
   }
@@ -55,7 +70,8 @@ public class UserServiceImpl implements UserService {
               this.userOAuthRepository.save(userOAuthModel);
               return this.userModelConverter.toDto(userModel);
             }).subscribeOn(Schedulers.boundedElastic())
-        );
+        )
+        .doOnNext(ignored -> this.registry.counter(UNIQUE_DAILY_LOGINS_COUNTER).increment());
   }
 
   @Override
