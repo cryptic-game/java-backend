@@ -65,7 +65,7 @@ jobs:
       - name: Build Jars
         run: ./gradlew :${{ matrix.service }}:assemble --stacktrace --no-daemon
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.service }}
           path: ${{ matrix.service }}/build/libs
